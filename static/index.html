@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>COBOL Finance</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/overrides.css" />
+  </head>
+  <body>
+    <section id="authView" class="auth-shell">
+      <div class="auth-card">
+        <div class="brand"><span class="brand-mark">CF</span><span>COBOL Finance</span></div>
+        <div id="loginForm">
+          <h1>Organize sua vida financeira</h1>
+          <p>Entre para acompanhar suas receitas, despesas e objetivos.</p>
+          <label for="email">E-mail</label><input id="email" type="email" autocomplete="email" placeholder="voce@email.com" />
+          <label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Sua senha" />
+          <button class="btn primary full" onclick="login()">Entrar</button>
+          <button class="btn ghost full" onclick="toggleRegister()">Criar conta</button>
+          <button class="text-button" onclick="showReset()">Esqueci minha senha</button>
+        </div>
+        <div id="registerForm" hidden>
+          <h1>Crie sua conta</h1>
+          <p>Comece a controlar sua rotina financeira hoje.</p>
+          <label for="name">Nome</label><input id="name" autocomplete="name" placeholder="Como podemos chamar você?" />
+          <label for="registerEmail">E-mail</label><input id="registerEmail" type="email" autocomplete="email" placeholder="voce@email.com" />
+          <label for="registerPassword">Senha</label><input id="registerPassword" type="password" autocomplete="new-password" placeholder="Mínimo de 6 caracteres" />
+          <label for="confirmation">Confirme sua senha</label><input id="confirmation" type="password" autocomplete="new-password" placeholder="Repita a senha" />
+          <button class="btn primary full" onclick="register()">Criar conta</button>
+          <button class="text-button" onclick="toggleRegister()">Já tenho uma conta</button>
+        </div>
+        <div id="reset" hidden>
+          <h1>Redefinir senha</h1>
+          <p>Informe seu e-mail, solicite o código e defina uma nova senha.</p>
+          <label for="resetEmail">E-mail</label><input id="resetEmail" type="email" placeholder="voce@email.com" />
+          <button class="btn outline full" onclick="requestReset()">Enviar código por e-mail</button>
+          <label for="resetCode">Código de 6 dígitos</label><input id="resetCode" inputmode="numeric" maxlength="6" placeholder="000000" />
+          <label for="newPassword">Nova senha</label><input id="newPassword" type="password" placeholder="Mínimo de 6 caracteres" />
+          <label for="newConfirmation">Confirme a nova senha</label><input id="newConfirmation" type="password" placeholder="Repita a nova senha" />
+          <button class="btn primary full" onclick="confirmReset()">Redefinir senha</button>
+          <button class="text-button" onclick="showReset()">Voltar para entrar</button>
+        </div>
+        <p id="authMessage" class="form-message" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section id="app" hidden>
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">CF</span><span>COBOL Finance</span></div>
+        <nav aria-label="Navegação principal">
+          <button class="nav-link active" data-section="overview" onclick="goTo('overview', this)">⌂ <span>Visão geral</span></button>
+          <button class="nav-link" data-section="calendarSection" onclick="goTo('calendarSection', this)">▣ <span>Calendário</span></button>
+          <button class="nav-link" data-section="historySection" onclick="goTo('historySection', this)">≡ <span>Histórico</span></button>
+          <button class="nav-link" data-section="assistantSection" onclick="goTo('assistantSection', this)">◌ <span>Assistente</span></button>
+        </nav>
+        <button class="nav-link logout" onclick="logout()">↪ <span>Sair</span></button>
+      </aside>
+
+      <main class="dashboard">
+        <header class="topbar">
+          <div><p class="eyebrow">Visão geral</p><h1>Olá, <span id="who"></span></h1></div>
+          <button class="icon-button" id="themeButton" onclick="toggleTheme()" title="Alternar tema">◐</button>
+        </header>
+
+        <section id="overview" class="section-block">
+          <article class="balance-card">
+            <div><p>Saldo atual</p><strong id="balanceValue" class="currency">R$ 0,00</strong><span id="balanceHint">Receitas menos despesas acumuladas</span></div>
+            <button class="icon-button light" id="privacyButton" onclick="togglePrivacy()" title="Ocultar valores">◉</button>
+          </article>
+          <div id="summaryCards" class="summary-grid"></div>
+        </section>
+
+        <section class="panel income-panel">
+          <div class="panel-heading"><div><p class="eyebrow">Planejamento</p><h2>Regra 60/30/20 <button class="help" title="Uma referência simples: até 60% para necessidades, 30% para desejos e 20% para poupar ou investir.">?</button></h2></div></div>
+          <div class="salary-form"><div><label for="salary">Sua renda mensal</label><input id="salary" type="number" min="0" step="0.01" placeholder="Ex.: 3500,00" /></div><button class="btn primary" onclick="saveSalary()">Atualizar planejamento</button></div>
+          <div id="budgetBars" class="budget-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Movimentações</p><h2>Registrar lançamento</h2></div></div>
+          <div class="transaction-form">
+            <div><label for="kind">Tipo</label><select id="kind" onchange="updateTransactionButton()"><option value="expense">Despesa</option><option value="revenue">Receita</option></select></div>
+            <div><label for="desc">Descrição</label><input id="desc" placeholder="Ex.: Mercado da semana" /></div>
+            <div><label for="amount">Valor</label><input id="amount" type="number" min="0.01" step="0.01" placeholder="0,00" /></div>
+            <div><label for="category">Categoria</label><select id="category"><option>Alimentação</option><option>Moradia</option><option>Transporte</option><option>Salário</option><option>Investimentos</option><option>Lazer</option><option>Outros</option></select></div>
+            <div><label for="spent">Grupo 60/30/20</label><select id="spent"><option value="necessidades">Necessidades</option><option value="desejos">Desejos</option><option value="investimentos">Poupança / investimento</option></select></div>
+            <button id="transactionButton" class="btn danger" onclick="add()">− Registrar despesa</button>
+          </div>
+        </section>
+
+        <section id="calendarSection" class="panel section-block">
+          <div class="panel-heading"><div><p class="eyebrow">Agenda</p><h2>Calendário de lembretes</h2></div><div class="calendar-controls"><button class="icon-button" onclick="changeMonth(-1)" title="Mês anterior">‹</button><span id="calendarMonth"></span><button class="icon-button" onclick="changeMonth(1)" title="Próximo mês">›</button></div></div>
+          <div class="reminder-form"><div><label for="remType">Tipo</label><select id="remType"><option value="Conta">🏠 Conta</option><option value="Despesa">↗ Despesa</option><option value="Recebimento">↓ Recebimento</option><option value="Investimento">◈ Investimento</option></select></div><div><label for="remTitle">Lembrete</label><input id="remTitle" placeholder="Ex.: Vencimento da luz" /></div><div><label for="remDate">Data</label><input id="remDate" type="date" /></div><div><label for="remAmount">Valor (opcional)</label><input id="remAmount" type="number" min="0" step="0.01" placeholder="0,00" /></div><button class="btn primary" onclick="addReminder()">+ Adicionar lembrete</button></div>
+          <div id="calendar" class="calendar"></div>
+          <div id="reminderList" class="reminder-list"></div>
+        </section>
+
+        <section id="historySection" class="panel section-block">
+          <div class="panel-heading"><div><p class="eyebrow">Movimentações</p><h2>Histórico financeiro</h2></div><div class="filters"><select id="historyType" onchange="renderHistory()"><option value="all">Todos os tipos</option><option value="revenue">Receitas</option><option value="expense">Despesas</option></select><select id="historyPeriod" onchange="renderHistory()"><option value="all">Todo o período</option><option value="month">Este mês</option><option value="30">Últimos 30 dias</option></select></div></div>
+          <div id="history" class="transaction-table"></div>
+        </section>
+
+        <section id="assistantSection" class="panel assistant section-block">
+          <div class="panel-heading"><div><p class="eyebrow">Orientação</p><h2>◌ Assistente financeiro</h2><p>Insights baseados nos seus lançamentos; não substitui orientação profissional.</p></div><button class="btn outline" onclick="loadInsights()">◌ Perguntar ao assistente</button></div>
+          <div id="insights" class="insights"></div>
+        </section>
+      </main>
+      <nav class="mobile-nav"><button onclick="goTo('overview')">⌂<span>Início</span></button><button onclick="goTo('calendarSection')">▣<span>Agenda</span></button><button onclick="goTo('historySection')">≡<span>Histórico</span></button><button onclick="goTo('assistantSection')">◌<span>Assistente</span></button></nav>
+    </section>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. FINANCE-RULES.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  ARG           PIC X(30).
+       01  COMMAND-NAME  PIC X(12).
+       01  INCOME        PIC 9(9)V99 VALUE 0.
+       01  NEEDS         PIC 9(9)V99.
+       01  WANTS         PIC 9(9)V99.
+       01  SAVINGS       PIC 9(9)V99.
+
+       PROCEDURE DIVISION.
+           ACCEPT ARG FROM COMMAND-LINE
+           UNSTRING ARG DELIMITED BY SPACE
+               INTO COMMAND-NAME INCOME
+           COMPUTE NEEDS = INCOME * 0.60
+           COMPUTE WANTS = INCOME * 0.30
+           COMPUTE SAVINGS = INCOME * 0.20
+           DISPLAY NEEDS ';' WANTS ';' SAVINGS
+           GOBACK.
